@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Incident } from './incident.entity';
 import { Prisonnier } from '../prisonniers/prisonnier.entity';
 import { CreerIncidentDto } from './dtos/creer-incident.dto';
@@ -13,7 +13,15 @@ export class IncidentsService {
   ) {}
 
   async creerIncident(donnees: CreerIncidentDto) {
-    const prisonniersTrouves = await this.repoPrisonnier.findBy({ numeroIdentification: In(donnees.prisonniersIds) });
+    const prisonniersTrouves: Prisonnier[] = [];
+    
+    for (let i = 0; i < donnees.prisonniersIds.length; i++) {
+      const pId = donnees.prisonniersIds[i];
+      const p = await this.repoPrisonnier.findOne({ where: { numeroIdentification: pId } });
+      if (p !== null) {
+        prisonniersTrouves.push(p);
+      }
+    }
 
     if (prisonniersTrouves.length === 0) {
       throw new NotFoundException('Aucun prisonnier trouvé avec ces identifiants');
@@ -35,8 +43,8 @@ export class IncidentsService {
   }
 
   async trouverParId(id: number) {
-    const incident = await this.repoIncident.findOne({ where: { id }, relations: ['prisonniers'] });
-    if (!incident) {
+    const incident = await this.repoIncident.findOne({ where: { id: id }, relations: ['prisonniers'] });
+    if (incident === null) {
       throw new NotFoundException('Incident introuvable');
     }
     return incident;
