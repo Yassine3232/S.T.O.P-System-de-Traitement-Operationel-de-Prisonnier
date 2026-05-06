@@ -6,10 +6,10 @@ export class Visite {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: true })
   nomMembreFamille: string;
 
-  @Column()
+  @Column({ nullable: true })
   lienFamilial: string;
 
   @Column({ default: 'en_attente' })
@@ -17,6 +17,18 @@ export class Visite {
 
   @Column({ nullable: true })
   dateVisite: string;
+
+  @Column({ nullable: true })
+  nomVisiteur: string;
+
+  @Column({ nullable: true })
+  date: string;
+
+  @Column({ nullable: true })
+  heure: string;
+
+  @Column({ nullable: true })
+  duree: string;
 
   @Column({ nullable: true })
   motifRefus: string;

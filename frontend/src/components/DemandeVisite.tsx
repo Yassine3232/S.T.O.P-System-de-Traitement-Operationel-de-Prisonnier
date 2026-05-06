@@ -13,17 +13,38 @@ export default function DemandeVisite() {
   const [message, setMessage] = useState('');
   const [erreur, setErreur] = useState('');
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const newForm = { ...form };
+    const name = e.target.name;
+    const value = e.target.value;
+    
+    if (name === 'prisonnierId') {
+      newForm.prisonnierId = value;
+    } else if (name === 'nomMembreFamille') {
+      newForm.nomMembreFamille = value;
+    } else if (name === 'lienFamilial') {
+      newForm.lienFamilial = value;
+    }
+    
+    setForm(newForm);
+  }
 
-  const envoyerDemande = async () => {
-    if (!form.prisonnierId || !form.nomMembreFamille || !form.lienFamilial) {
+  async function envoyerDemande() {
+    if (form.prisonnierId === '') {
       setErreur('Veuillez remplir tous les champs');
       return;
     }
+    if (form.nomMembreFamille === '') {
+      setErreur('Veuillez remplir tous les champs');
+      return;
+    }
+    if (form.lienFamilial === '') {
+      setErreur('Veuillez remplir tous les champs');
+      return;
+    }
+
     try {
-      await axios.post('http://localhost:3000/visites', {
+      await axios.post('http://localhost:3000/visites/demande', {
         prisonnierId: Number(form.prisonnierId),
         nomMembreFamille: form.nomMembreFamille,
         lienFamilial: form.lienFamilial,
@@ -32,14 +53,35 @@ export default function DemandeVisite() {
       setErreur('');
       setForm({ prisonnierId: '', nomMembreFamille: '', lienFamilial: '' });
     } catch (e: any) {
-      setErreur(e.response?.data?.message || 'Erreur lors de l\'envoi de la demande');
+      if (e.response && e.response.data && e.response.data.message) {
+        let msg = e.response.data.message;
+        if (Array.isArray(msg)) {
+          msg = msg[0];
+        }
+        setErreur(msg);
+      } else {
+        setErreur('Erreur lors de l\'envoi de la demande');
+      }
     }
-  };
+  }
+
+  const barresArray = [];
+  for (let i = 0; i < 8; i++) {
+    barresArray.push(i);
+  }
+
+  let dateTexte = new Date().toLocaleDateString('fr-CA');
+
+  function retourAccueil() {
+    navigate('/');
+  }
 
   return (
     <div className="prison-wrap">
       <div className="bars">
-        {Array.from({ length: 8 }).map((_, i) => <div className="bar" key={i} />)}
+        {barresArray.map(function(i) {
+          return <div className="bar" key={i} />;
+        })}
       </div>
 
       <div className="card">
@@ -83,17 +125,17 @@ export default function DemandeVisite() {
 
         <button className="btn" onClick={envoyerDemande}>Soumettre la demande</button>
 
-        {message && <p className="status ok">{message}</p>}
-        {erreur && <p className="status err">[ ERREUR ] {erreur}</p>}
+        {message !== '' && <p className="status ok">{message}</p>}
+        {erreur !== '' && <p className="status err">[ ERREUR ] {erreur}</p>}
 
         <div className="card-footer">
           <button
-            onClick={() => navigate('/')}
+            onClick={retourAccueil}
             style={{ background: 'none', border: 'none', color: '#888780', fontFamily: 'IBM Plex Mono, monospace', fontSize: '11px', cursor: 'pointer' }}
           >
             Retour à l'accueil
           </button>
-          <span>{new Date().toLocaleDateString('fr-CA')}</span>
+          <span>{dateTexte}</span>
         </div>
       </div>
     </div>
