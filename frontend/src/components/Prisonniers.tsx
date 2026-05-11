@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import './Incidents.css'; // même CSS
+import './Incidents.css';
 
 interface Prisonnier {
   numeroIdentification: number;
@@ -28,6 +28,13 @@ interface PrisonnierForm {
   celluleNom: string;
 }
 
+interface Historique {
+  id: number;
+  typeEvenement: string;
+  description: string;
+  date: string;
+}
+
 export default function Prisonniers() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -37,7 +44,9 @@ export default function Prisonniers() {
     dureePeine: '', dateArrivee: '', dateSortiePrevue: '', celluleNom: '',
   });
   const [prisonnierModif, setPrisonnierModif] = useState<Prisonnier | null>(null);
-  const [vue, setVue] = useState<'liste' | 'creer' | 'modifier'>('liste');
+  const [prisonnierHistorique, setPrisonnierHistorique] = useState<Prisonnier | null>(null);
+  const [historique, setHistorique] = useState<Historique[]>([]);
+  const [vue, setVue] = useState<'liste' | 'creer' | 'modifier' | 'historique'>('liste');
   const [message, setMessage] = useState('');
   const [erreur, setErreur] = useState('');
 
@@ -100,6 +109,13 @@ export default function Prisonniers() {
     } catch (e: any) {
       setErreur(e.response?.data?.message || 'Erreur lors de la modification');
     }
+  };
+
+  const ouvrirHistorique = async (p: Prisonnier) => {
+    setPrisonnierHistorique(p);
+    const res = await axios.get(`http://localhost:3000/historique/${p.numeroIdentification}`);
+    setHistorique(res.data);
+    setVue('historique');
   };
 
   const formulaire = (onSubmit: () => void, label: string) => (
@@ -209,6 +225,7 @@ export default function Prisonniers() {
                     {isDirecteur && (
                       <td>
                         <button className="action-btn edit" onClick={() => ouvrirModification(p)}>Modifier</button>
+                        <button className="action-btn edit" onClick={() => ouvrirHistorique(p)}>Historique</button>
                       </td>
                     )}
                   </tr>
@@ -221,6 +238,33 @@ export default function Prisonniers() {
         {vue === 'creer' && isGarde && formulaire(creerPrisonnier, 'Enregistrer le prisonnier')}
 
         {vue === 'modifier' && isDirecteur && formulaire(modifierPrisonnier, 'Sauvegarder les modifications')}
+
+        {vue === 'historique' && prisonnierHistorique && (
+          <div className="form-card" style={{ maxWidth: '700px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h2 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '24px', color: '#2c2c28' }}>
+                Historique — {prisonnierHistorique.nom} {prisonnierHistorique.prenom}
+              </h2>
+              <button className="tab-btn" onClick={() => setVue('liste')}>Retour</button>
+            </div>
+
+            {historique.length === 0 && (
+              <p style={{ color: '#888780', fontSize: '13px' }}>Aucun événement enregistré.</p>
+            )}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {historique.map(h => (
+                <div key={h.id} style={{ borderLeft: `3px solid ${h.typeEvenement === 'visite' ? '#3B6D11' : h.typeEvenement === 'modification' ? '#b35c2a' : '#2c2c28'}`, paddingLeft: '1rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span className="tag">{h.typeEvenement.toUpperCase()}</span>
+                    <span style={{ fontSize: '11px', color: '#888780' }}>{new Date(h.date).toLocaleString('fr-CA')}</span>
+                  </div>
+                  <p style={{ fontSize: '13px', color: '#2c2c28', marginTop: '0.4rem' }}>{h.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
