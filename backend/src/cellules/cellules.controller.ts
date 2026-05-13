@@ -9,11 +9,12 @@ import { RolesGuard } from 'src/guards/roles-guards';
 
 @Controller('cellules')
 export class CellulesController {
-  constructor(private service: CellulesService) {}
+  constructor(private service: CellulesService) { }
 
-  @AllowedConnected()
-  @UseGuards(RolesGuard)
-  @Roles(Profile.Directeur)
+
+  @UseGuards(RolesGuard) //RolesGuard decorateur qui permet de specifier que la route est accessible seulement aux utilisateurs connectes 
+  @Roles(Profile.Directeur) //Roles decorateur qui permet de specifier que la route est accessible seulement aux utilisateurs connectes 
+  @AllowedConnected()   //AllowedConnected() decorateur qui permet de specifier que la route est accessible seulement aux utilisateurs connectes  
   @Post()
   async createCellule(@Body() body: CreateCelluleDto) {
     return await this.service.create(body);
@@ -21,7 +22,7 @@ export class CellulesController {
 
   @AllowedConnected()
   @UseGuards(RolesGuard)
-  @Roles(Profile.Garde,Profile.Directeur)
+  @Roles(Profile.Garde, Profile.Directeur)
   @Get()
   async findAll() {
     return await this.service.findAll();
@@ -29,7 +30,7 @@ export class CellulesController {
 
   @AllowedConnected()
   @UseGuards(RolesGuard)
-  @Roles(Profile.Garde,Profile.Directeur)
+  @Roles(Profile.Garde, Profile.Directeur)
   @Get('/:id')
   async getCelluleById(@Param('id', ParseIntPipe) id: number) {
     return await this.service.findById(id);
@@ -40,6 +41,6 @@ export class CellulesController {
   @Roles(Profile.Directeur)
   @Patch('/:id')
   async updateCellule(@Param('id', ParseIntPipe) id: number, @Body() body: any) {
-      return await this.service.update(id, body);
+    return await this.service.update(id, body);
   }
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { getCellules } from '../api/cellules.service';
 import './Incidents.css'; 
 
 interface Prisonnier {
@@ -16,47 +16,47 @@ interface Cellule {
   prisonniers: Prisonnier[];
 }
 
-export default function Cellules() {
+export default function Cellules() { //fonction Cellules permet de afficher les cellules
   const auth = useAuth();
   const user = auth.user;
-  const navigate = useNavigate();
+  const navigate = useNavigate(); //fonction navigate permet de naviguer entre les pages
 
-  const [cellules, setCellules] = useState<Cellule[]>([]);
-  const [erreur, setErreur] = useState('');
+  const [cellules, setCellules] = useState<Cellule[]>([]); //cellules est un tableau de cellules
+  const [erreur, setErreur] = useState(''); //erreur est un message d'erreur 
 
-  let isGarde = false;
-  if (user !== null && user.profile === 1) {
-    isGarde = true;
+  let isGarde = false; //isGarde est un boolean qui permet de savoir si l'utilisateur est un garde
+  if (user !== null && user.profile === 1) { //si l'utilisateur est connecte et que son profile est 1 (garde)
+    isGarde = true; //isGarde devient true
   }
 
-  let isDirecteur = false;
-  if (user !== null && user.profile === 2) {
-    isDirecteur = true;
+  let isDirecteur = false; //isDirecteur est un boolean qui permet de savoir si l'utilisateur est un directeur
+  if (user !== null && user.profile === 2) { //si l'utilisateur est connecte et que son profile est 2 (directeur)
+    isDirecteur = true; //isDirecteur devient true
   }
 
   useEffect(() => {
-    chargerCellules();
-  }, []);
+    chargerCellules(); //appel de la fonction chargerCellules pour charger les cellules
+  }, []); //useEffect est un hook qui permet de executer une fonction apres le rendu de la page
 
-  async function chargerCellules() {
+  async function chargerCellules() { //fonction chargerCellules permet de charger les cellules
     try {
-      const res = await axios.get('http://localhost:3000/cellules');
-      setCellules(res.data);
+      const data = await getCellules(); //envoie une requête GET à l'API pour récupérer toutes les cellules 
+      setCellules(data);
     } catch (e: any) {
       setErreur('Erreur lors du chargement des cellules');
     }
   }
 
-  function allerAuxIncidents() { navigate('/incidents'); }
-  function allerAuxPrisonniers() { navigate('/prisonniers'); }
-  function allerAuxCellules() { navigate('/cellules'); }
-  function allerAuxVisites() { navigate('/visites'); }
-  function allerAuxComptes() { navigate('/comptes'); }
-  function deconnexion() { navigate('/'); }
+  function allerAuxIncidents() { navigate('/incidents'); } //fonction allerAuxIncidents permet de naviguer vers la page des incidents
+  function allerAuxPrisonniers() { navigate('/prisonniers'); } //fonction allerAuxPrisonniers permet de naviguer vers la page des prisonniers
+  function allerAuxCellules() { navigate('/cellules'); } //fonction allerAuxCellules permet de naviguer vers la page des cellules
+  function allerAuxVisites() { navigate('/visites'); } //fonction allerAuxVisites permet de naviguer vers la page des visites
+  function allerAuxComptes() { navigate('/comptes'); } //fonction allerAuxComptes permet de naviguer vers la page des comptes
+  function deconnexion() { navigate('/'); } //fonction deconnexion permet de deconnecter l'utilisateur 
 
-  let userName = '';
-  if (user !== null && user.name) {
-    userName = user.name;
+  let userName = ''; //userName est le nom de l'utilisateur
+  if (user !== null && user.name) { //si l'utilisateur est connecte et que son nom existe
+    userName = user.name; //userName prend le nom de l'utilisateur
   }
 
   let roleTexte = 'Directeur';

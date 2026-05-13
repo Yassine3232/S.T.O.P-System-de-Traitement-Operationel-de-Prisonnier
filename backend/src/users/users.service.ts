@@ -31,7 +31,7 @@ export class UserService {
   async update(id: number, attrs: Partial<User>) {
     const user = await this.findById(id);
     if (user === null) {
-      throw new Error('user not found');
+      throw new Error('Utilisateur introuvable');
     }
     
     if (attrs.email !== undefined) user.email = attrs.email;
@@ -46,7 +46,7 @@ export class UserService {
   async remove(id: number) {
     const user = await this.findById(id);
     if (user === null) {
-      throw new Error('user not found');
+      throw new Error('Utilisateur introuvable');
     }
     return this.repo.remove(user);
   }

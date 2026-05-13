@@ -1,8 +1,8 @@
 import { Column, Entity, ManyToOne, JoinColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { Prisonnier } from '../prisonniers/prisonnier.entity';
 
-@Entity()
-export class Historique {
+@Entity() //Entity decorateur qui permet de specifier que la classe est une entite 
+export class Historique { //classe qui permet de stocker l'historique d'un prisonnier 
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -15,7 +15,7 @@ export class Historique {
   @Column()
   date: string;
 
-  @ManyToOne(() => Prisonnier)
+  @ManyToOne(() => Prisonnier, { onDelete: 'CASCADE' })
   @JoinColumn()
   prisonnier: Prisonnier;
 }

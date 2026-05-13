@@ -21,7 +21,7 @@ export class IncidentsService {
       const pId = donnees.prisonniersIds[i];
       const p = await this.repoPrisonnier.findOne({ where: { numeroIdentification: pId } });
       if (p !== null) {
-        prisonniersTrouves.push(p);
+        prisonniersTrouves.push(p); //.push() permet d'ajouter un element a un tableau
       }
     }
 

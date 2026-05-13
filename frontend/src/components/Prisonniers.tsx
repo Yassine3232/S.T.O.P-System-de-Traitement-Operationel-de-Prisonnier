@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { getPrisonniers, createPrisonnier, updatePrisonnier, getHistorique } from '../api/prisonniers.service';
+import apiClient from '../api/apiClient';
 import './Incidents.css';
 
 interface Prisonnier {
@@ -36,159 +37,175 @@ interface Historique {
 }
 
 export default function Prisonniers() {
-  const auth = useAuth();
-  const user = auth.user;
-  const navigate = useNavigate();
+  const auth = useAuth(); //useAuth est un hook qui permet de récupérer les informations de l'utilisateur connecté
+  const user = auth.user; //user est l'utilisateur connecté
+  const navigate = useNavigate(); //navigate est une fonction qui permet de naviguer entre les pages
 
-  const [prisonniers, setPrisonniers] = useState<Prisonnier[]>([]);
+  const [prisonniers, setPrisonniers] = useState<Prisonnier[]>([]); //prisonniers est un tableau de prisonniers
   const [form, setForm] = useState<PrisonnierForm>({
     nom: '', prenom: '', dateNaissance: '', accusation: '',
     dureePeine: '', dateArrivee: '', dateSortiePrevue: '', celluleNom: '',
   });
 
-  const [prisonnierModif, setPrisonnierModif] = useState<Prisonnier | null>(null);
-  const [prisonnierHistorique, setPrisonnierHistorique] = useState<Prisonnier | null>(null);
-  const [historique, setHistorique] = useState<Historique[]>([]);
-  const [vue, setVue] = useState<'liste' | 'creer' | 'modifier' | 'historique'>('liste');
-  const [message, setMessage] = useState('');
-  const [erreur, setErreur] = useState('');
+  const [prisonnierModif, setPrisonnierModif] = useState<Prisonnier | null>(null); //prisonnierModif est le prisonnier qui sera modifié
+  const [prisonnierHistorique, setPrisonnierHistorique] = useState<Prisonnier | null>(null); //prisonnierHistorique est le prisonnier dont on veut voir l'historique
+  const [historique, setHistorique] = useState<Historique[]>([]); //historique est l'historique du prisonnier
+  const [vue, setVue] = useState<'liste' | 'creer' | 'modifier' | 'historique'>('liste'); //vue est la vue qui sera affichée
+  const [message, setMessage] = useState(''); //message est le message qui sera affiché
+  const [erreur, setErreur] = useState(''); //erreur est l'erreur qui sera affichée
 
-  let isGarde = false;
-  if (user !== null && user.profile === 1) isGarde = true;
+  let isGarde = false; //isGarde est un boolean qui permet de vérifier si l'utilisateur est un garde
+  if (user !== null && user.profile === 1) isGarde = true; //verification si l'utilisateur est un garde
 
-  let isDirecteur = false;
-  if (user !== null && user.profile === 2) isDirecteur = true;
+  let isDirecteur = false; //isDirecteur est un boolean qui permet de vérifier si l'utilisateur est un directeur
+  if (user !== null && user.profile === 2) isDirecteur = true; //verification si l'utilisateur est un directeur
 
-  useEffect(() => { chargerPrisonniers(); }, []);
+  useEffect(() => { chargerPrisonniers(); }, []); //useEffect permet de charger les prisonniers au démarrage de la page
 
   async function chargerPrisonniers() {
     try {
-      const res = await axios.get('http://localhost:3000/prisonniers');
-      setPrisonniers(res.data);
+      const data = await getPrisonniers(); //getPrisonniers est une fonction qui permet de récupérer les prisonniers
+      setPrisonniers(data); //setPrisonniers permet de mettre à jour les prisonniers
     } catch (e: any) {
       setErreur('Erreur lors du chargement des prisonniers');
     }
   }
 
+  async function libererExpires() {
+    try {
+      await apiClient.post('/prisonniers/liberer-expires'); //apiClient.post est une fonction qui permet d'envoyer une requête POST à l'API
+      setMessage('Prisonniers expirés libérés avec succès'); //setMessage est une fonction qui permet de mettre à jour le message
+      setErreur(''); //setErreur est une fonction qui permet de mettre à jour l'erreur
+      chargerPrisonniers(); //chargerPrisonniers est une fonction qui permet de charger les prisonniers
+    } catch (e: any) {
+      setErreur(e.response?.data?.message || 'Erreur lors de la libération'); //setErreur est une fonction qui permet de mettre à jour l'erreur
+    }
+  }
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const newForm = { ...form };
-    const name = e.target.name;
-    const value = e.target.value;
-    if (name === 'nom') newForm.nom = value;
-    else if (name === 'prenom') newForm.prenom = value;
-    else if (name === 'dateNaissance') newForm.dateNaissance = value;
-    else if (name === 'accusation') newForm.accusation = value;
-    else if (name === 'dureePeine') newForm.dureePeine = value;
-    else if (name === 'dateArrivee') newForm.dateArrivee = value;
-    else if (name === 'dateSortiePrevue') newForm.dateSortiePrevue = value;
-    else if (name === 'celluleNom') newForm.celluleNom = value;
-    setForm(newForm);
+    const newForm = { ...form }; //newForm est un objet qui permet de stocker les modifications
+    const name = e.target.name; //name est le nom du champ
+    const value = e.target.value; //value est la valeur du champ
+    if (name === 'nom') newForm.nom = value; //newForm.nom est le nom du champ nom
+    else if (name === 'prenom') newForm.prenom = value; //newForm.prenom est le nom du champ prenom
+    else if (name === 'dateNaissance') newForm.dateNaissance = value; //newForm.dateNaissance est le nom du champ dateNaissance
+    else if (name === 'accusation') newForm.accusation = value; //newForm.accusation est le nom du champ accusation
+    else if (name === 'dureePeine') newForm.dureePeine = value; //newForm.dureePeine est le nom du champ dureePeine
+    else if (name === 'dateArrivee') newForm.dateArrivee = value; //newForm.dateArrivee est le nom du champ dateArrivee
+    else if (name === 'dateSortiePrevue') newForm.dateSortiePrevue = value; //newForm.dateSortiePrevue est le nom du champ dateSortiePrevue
+    else if (name === 'celluleNom') newForm.celluleNom = value; //newForm.celluleNom est le nom du champ celluleNom
+    setForm(newForm); //setForm est une fonction qui permet de mettre à jour le formulaire
   }
 
   async function creerPrisonnier() {
     if (form.nom === '' || form.prenom === '' || form.dateNaissance === '' || form.accusation === '' || form.dureePeine === '' || form.dateArrivee === '' || form.dateSortiePrevue === '' || form.celluleNom === '') {
-      setErreur('Veuillez remplir tous les champs');
+      setErreur('Veuillez remplir tous les champs'); //setErreur est une fonction qui permet de mettre à jour l'erreur
       return;
     }
     try {
-      await axios.post('http://localhost:3000/prisonniers', {
+      await createPrisonnier({
         nom: form.nom, prenom: form.prenom, dateNaissance: form.dateNaissance,
-        accusation: form.accusation, dureePeine: Number(form.dureePeine),
+        accusation: form.accusation, dureePeine: Number(form.dureePeine), //Number() est une fonction qui permet de convertir la durée de la peine en nombre entier
         dateArrivee: form.dateArrivee, dateSortiePrevue: form.dateSortiePrevue,
         celluleNom: form.celluleNom
       });
-      setMessage('Prisonnier créé avec succès');
-      setErreur('');
-      setForm({ nom: '', prenom: '', dateNaissance: '', accusation: '', dureePeine: '', dateArrivee: '', dateSortiePrevue: '', celluleNom: '' });
-      setVue('liste');
-      chargerPrisonniers();
+      setMessage('Prisonnier créé avec succès'); //setMessage est une fonction qui permet de mettre à jour le message
+      setErreur(''); //setErreur est une fonction qui permet de mettre à jour l'erreur
+      setForm({ nom: '', prenom: '', dateNaissance: '', accusation: '', dureePeine: '', dateArrivee: '', dateSortiePrevue: '', celluleNom: '' }); //setForm est une fonction qui permet de mettre à jour le formulaire
+      setVue('liste'); //setVue est une fonction qui permet de mettre à jour la vue
+      chargerPrisonniers(); //chargerPrisonniers est une fonction qui permet de charger les prisonniers
     } catch (e: any) {
-      setErreur(e.response?.data?.message || 'Erreur lors de la création');
+      setErreur(e.response?.data?.message || 'Erreur lors de la création'); //setErreur est une fonction qui permet de mettre à jour l'erreur
     }
   }
 
-  function ouvrirModification(p: Prisonnier) {
-    setPrisonnierModif(p);
-    let cellName = '';
-    if (p.cellule && p.cellule.nom) cellName = p.cellule.nom;
+  function ouvrirModification(p: Prisonnier) { //fonction ouvrirModification permet de modifier un prisonnier
+    setPrisonnierModif(p); //setPrisonnierModif est une fonction qui permet de mettre à jour le prisonnier à modifier
+    let cellName = ''; //cellName est le nom de la cellule
+    if (p.cellule && p.cellule.nom) cellName = p.cellule.nom; //verification si le prisonnier a une cellule
     setForm({
-      nom: p.nom, prenom: p.prenom, dateNaissance: p.dateNaissance,
-      accusation: p.accusation, dureePeine: p.dureePeine.toString(),
-      dateArrivee: p.dateArrivee, dateSortiePrevue: p.dateSortiePrevue,
-      celluleNom: cellName,
-    });
-    setVue('modifier');
+      nom: p.nom, prenom: p.prenom, dateNaissance: p.dateNaissance, //nom, prenom, dateNaissance sont les informations du prisonnier
+      accusation: p.accusation, dureePeine: p.dureePeine.toString(), //accusation, dureePeine sont les informations du prisonnier
+      dateArrivee: p.dateArrivee, dateSortiePrevue: p.dateSortiePrevue, //dateArrivee, dateSortiePrevue sont les informations du prisonnier
+      celluleNom: cellName, //celluleNom est le nom de la cellule
+    }); //setForm est une fonction qui permet de mettre à jour le formulaire
+    setVue('modifier'); //setVue est une fonction qui permet de mettre à jour la vue
   }
 
-  async function modifierPrisonnier() {
-    if (prisonnierModif === null) return;
+  async function modifierPrisonnier() { //fonction modifierPrisonnier permet de modifier un prisonnier
+    if (prisonnierModif === null) return; //verification si le prisonnier n'est pas null
     try {
-      await axios.patch('http://localhost:3000/prisonniers/' + prisonnierModif.numeroIdentification, {
-        nom: form.nom, prenom: form.prenom, dateNaissance: form.dateNaissance,
-        accusation: form.accusation, dureePeine: Number(form.dureePeine),
-        dateArrivee: form.dateArrivee, dateSortiePrevue: form.dateSortiePrevue,
-        celluleNom: form.celluleNom
-      });
-      setMessage('Prisonnier modifié avec succès');
-      setErreur('');
-      setVue('liste');
-      chargerPrisonniers();
+      await updatePrisonnier(prisonnierModif.numeroIdentification, {
+        nom: form.nom, prenom: form.prenom, dateNaissance: form.dateNaissance, //nom, prenom, dateNaissance sont les informations du prisonnier
+        accusation: form.accusation, dureePeine: Number(form.dureePeine), //accusation, dureePeine sont les informations du prisonnier
+        dateArrivee: form.dateArrivee, dateSortiePrevue: form.dateSortiePrevue, //dateArrivee, dateSortiePrevue sont les informations du prisonnier
+        celluleNom: form.celluleNom //celluleNom est le nom de la cellule
+      }); //updatePrisonnier est une fonction qui permet de modifier un prisonnier
+      setMessage('Prisonnier modifié avec succès'); //setMessage est une fonction qui permet de mettre à jour le message
+      setErreur(''); //setErreur est une fonction qui permet de mettre à jour l'erreur
+      setVue('liste'); //setVue est une fonction qui permet de mettre à jour la vue
+      chargerPrisonniers(); //chargerPrisonniers est une fonction qui permet de charger les prisonniers
     } catch (e: any) {
-      setErreur(e.response?.data?.message || 'Erreur lors de la modification');
+      setErreur(e.response?.data?.message || 'Erreur lors de la modification'); //setErreur est une fonction qui permet de mettre à jour l'erreur
     }
   }
 
-  async function ouvrirHistorique(p: Prisonnier) {
-    setPrisonnierHistorique(p);
-    const res = await axios.get('http://localhost:3000/historique/' + p.numeroIdentification);
-    setHistorique(res.data);
-    setVue('historique');
+  async function ouvrirHistorique(p: Prisonnier) { //fonction ouvrirHistorique permet d'ouvrir l'historique d'un prisonnier
+    setPrisonnierHistorique(p); //setPrisonnierHistorique est une fonction qui permet de mettre à jour l'historique du prisonnier
+    const data = await getHistorique(p.numeroIdentification); //getHistorique est une fonction qui permet de récupérer l'historique d'un prisonnier
+    setHistorique(data); //setHistorique est une fonction qui permet de mettre à jour l'historique
+    setVue('historique'); //setVue est une fonction qui permet de mettre à jour la vue
   }
 
-  function allerAuxIncidents() { navigate('/incidents'); }
-  function allerAuxPrisonniers() { navigate('/prisonniers'); }
-  function allerAuxCellules() { navigate('/cellules'); }
-  function allerAuxVisites() { navigate('/visites'); }
-  function allerAuxComptes() { navigate('/comptes'); }
-  function deconnexion() { navigate('/'); }
+  function allerAuxIncidents() { navigate('/incidents'); } //fonction allerAuxIncidents redirige vers la page des incidents
+  function allerAuxPrisonniers() { navigate('/prisonniers'); } //fonction allerAuxPrisonniers redirige vers la page des prisonniers
+  function allerAuxCellules() { navigate('/cellules'); } //fonction allerAuxCellules redirige vers la page des cellules
+  function allerAuxVisites() { navigate('/visites'); } //fonction allerAuxVisites redirige vers la page des visites
+  function allerAuxComptes() { navigate('/comptes'); } //fonction allerAuxComptes redirige vers la page des comptes
+  function deconnexion() { navigate('/'); } //fonction deconnexion redirige vers la page d'accueil
 
-  function changerVueListe() { setVue('liste'); }
-  function changerVueCreer() { setVue('creer'); }
+  function changerVueListe() { setVue('liste'); } //fonction changerVueListe permet de mettre à jour la vue
+  function changerVueCreer() { setVue('creer'); } //fonction changerVueCreer permet de mettre à jour la vue
 
   let userName = '';
-  if (user !== null && user.name) userName = user.name;
+  if (user !== null && user.name) userName = user.name; //verification si l'utilisateur n'est pas null et si l'utilisateur a un nom
 
-  let roleTexte = 'Directeur';
-  if (isGarde) roleTexte = 'Garde';
+  let roleTexte = 'Directeur'; //roleTexte est le texte qui sera affiche dans le menu
+  if (isGarde) roleTexte = 'Garde'; //verification si l'utilisateur est un garde
 
-  let classVueCreer = 'tab-btn';
-  if (vue === 'creer') classVueCreer = 'tab-btn active';
+  let classVueCreer = 'tab-btn'; //classVueCreer est le style de la vue
+  if (vue === 'creer') classVueCreer = 'tab-btn active'; //verification si la vue est 'creer'
 
-  let actionsHeader = null;
-  if (isGarde) {
-    actionsHeader = <button className={classVueCreer} onClick={changerVueCreer}>+ Créer</button>;
+  let actionsHeader = null; //actionsHeader est le bouton d'action
+  if (isGarde || isDirecteur) { //verification si l'utilisateur est un garde ou un directeur
+    actionsHeader = (
+      <>
+        {isGarde && <button className={classVueCreer} onClick={changerVueCreer}>+ Créer</button>}
+        {isDirecteur && <button className="tab-btn" onClick={libererExpires}>🔓 Libérer expirés</button>}
+      </>
+    );
   }
 
-  let contenuPrincipal: any = null;
+  let contenuPrincipal: any = null; //contenuPrincipal est le contenu principal de la page
 
-  if (vue === 'liste') {
-    const lignesTableau: any[] = [];
-    if (prisonniers.length === 0) {
+  if (vue === 'liste') { //si la vue est 'liste'
+    const lignesTableau: any[] = []; //lignesTableau est un tableau qui contient les lignes du tableau
+    if (prisonniers.length === 0) { //si le nombre de prisonniers est 0
       lignesTableau.push(
-        <tr key="vide"><td colSpan={7} style={{ textAlign: 'center', color: '#888780' }}>Aucun prisonnier</td></tr>
+        <tr key="vide"><td colSpan={7} style={{ textAlign: 'center', color: '#888780' }}>Aucun prisonnier</td></tr> //ajouter une ligne vide
       );
-    } else {
-      for (let i = 0; i < prisonniers.length; i++) {
-        const p = prisonniers[i];
-        let celluleNom = '—';
-        if (p.cellule && p.cellule.nom) celluleNom = p.cellule.nom;
+    } else { //sinon
+      for (let i = 0; i < prisonniers.length; i++) { //parcourir tous les prisonniers
+        const p = prisonniers[i]; //p est le prisonnier actuel
+        let celluleNom = '—'; //celluleNom est le nom de la cellule
+        if (p.cellule && p.cellule.nom) celluleNom = p.cellule.nom; //verification si le prisonnier a une cellule
 
         let actionCell = null;
-        if (isDirecteur) {
+        if (isDirecteur) { //verification si l'utilisateur est un directeur
           actionCell = (
             <td>
-              <button className="action-btn edit" onClick={function() { ouvrirModification(p); }}>Modifier</button>
-              <button className="action-btn edit" onClick={function() { ouvrirHistorique(p); }}>Historique</button>
+              <button className="action-btn edit" onClick={function () { ouvrirModification(p); }}>Modifier</button>
+              <button className="action-btn edit" onClick={function () { ouvrirHistorique(p); }}>Historique</button>
             </td>
           );
         }
@@ -290,7 +307,7 @@ export default function Prisonniers() {
           <p style={{ color: '#888780', fontSize: '13px' }}>Aucun événement enregistré.</p>
         )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {historique.map(function(h) {
+          {historique.map(function (h) {
             let couleur = '#2c2c28';
             if (h.typeEvenement === 'visite') couleur = '#3B6D11';
             else if (h.typeEvenement === 'modification') couleur = '#b35c2a';

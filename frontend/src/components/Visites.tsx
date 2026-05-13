@@ -32,7 +32,7 @@ export default function Visites() {
   const auth = useAuth();
   const user = auth.user;
   const navigate = useNavigate();
-  
+
   const [visites, setVisites] = useState<Visite[]>([]);
   const [prisonniers, setPrisonniers] = useState<Prisonnier[]>([]);
   const [form, setForm] = useState<VisiteForm>({
@@ -42,7 +42,7 @@ export default function Visites() {
     heure: '',
     duree: '',
   });
-  
+
   const [vue, setVue] = useState<'liste' | 'attente' | 'creer' | 'modifier'>('liste');
   const [visiteIdSelectionnee, setVisiteIdSelectionnee] = useState<number | null>(null);
   const [message, setMessage] = useState('');
@@ -93,7 +93,7 @@ export default function Visites() {
     const newForm = { ...form };
     const name = e.target.name;
     const value = e.target.value;
-    
+
     if (name === 'prisonnierId') {
       newForm.prisonnierId = value;
     } else if (name === 'nomVisiteur') {
@@ -105,7 +105,7 @@ export default function Visites() {
     } else if (name === 'duree') {
       newForm.duree = value;
     }
-    
+
     setForm(newForm);
   }
 
@@ -163,20 +163,20 @@ export default function Visites() {
         } else {
           setMessage('Demande de visite envoyée au directeur');
         }
-        
+
         setTimeout(() => {
           setMessage('');
         }, 3000);
 
         setErreur('');
         setForm({ prisonnierId: '', nomVisiteur: '', date: '', heure: '', duree: '' });
-        
+
         if (vue === 'modifier') {
           setVue('liste');
         } else {
           setVue('attente');
         }
-        
+
         setVisiteIdSelectionnee(null);
         chargerVisites();
       } else {
@@ -200,18 +200,18 @@ export default function Visites() {
         credentials: 'include',
         body: JSON.stringify({ decision: decision }),
       });
-      
+
       if (res.ok) {
         if (decision === 'approuvee') {
           setMessage('Demande approuvée');
         } else {
           setMessage('Demande refusée');
         }
-        
+
         setTimeout(() => {
           setMessage('');
         }, 3000);
-        
+
         chargerVisites();
       } else {
         setErreur('Erreur lors de la réponse');
@@ -226,13 +226,13 @@ export default function Visites() {
     if (isConfirmed === false) {
       return;
     }
-    
+
     try {
       const res = await fetch('http://localhost:3000/visites/' + id, {
         method: 'DELETE',
         credentials: 'include',
       });
-      
+
       if (res.ok) {
         setMessage('');
         chargerVisites();
@@ -246,22 +246,22 @@ export default function Visites() {
 
   function ouvrirModifier(visite: Visite) {
     setVisiteIdSelectionnee(visite.id);
-    
+
     let nomVisiteur = '';
     if (visite.nomVisiteur) {
       nomVisiteur = visite.nomVisiteur;
     }
-    
+
     let date = '';
     if (visite.date) {
       date = visite.date;
     }
-    
+
     let heure = '';
     if (visite.heure) {
       heure = visite.heure;
     }
-    
+
     let duree = '';
     if (visite.duree) {
       duree = visite.duree;
@@ -375,7 +375,7 @@ export default function Visites() {
 
   if (vue === 'liste') {
     const lignesTableau: any[] = [];
-    
+
     if (isDirecteur) {
       if (safeVisites.length === 0) {
         lignesTableau.push(
@@ -388,14 +388,14 @@ export default function Visites() {
           if (v.prisonnier !== null && v.prisonnier !== undefined) {
             nomPrisonnier = v.prisonnier.nom + ' ' + v.prisonnier.prenom;
           }
-          
+
           let visiteur = '';
           if (v.nomVisiteur) {
             visiteur = v.nomVisiteur;
           } else if (v.nomMembreFamille) {
             visiteur = v.nomMembreFamille;
           }
-          
+
           let statutLabel = 'Approuvée';
           if (v.statut === 'en_attente') {
             statutLabel = 'En attente';
@@ -412,13 +412,13 @@ export default function Visites() {
           if (v.statut === 'en_attente') {
             actionsCell = (
               <>
-                <button className="action-btn edit" onClick={function() { repondreDemande(v.id, 'approuvee'); }}>Approuver</button>
-                <button className="action-btn delete" onClick={function() { repondreDemande(v.id, 'refusee'); }}>Refuser</button>
+                <button className="action-btn edit" onClick={function () { repondreDemande(v.id, 'approuvee'); }}>Approuver</button>
+                <button className="action-btn delete" onClick={function () { repondreDemande(v.id, 'refusee'); }}>Refuser</button>
               </>
             );
           } else {
             actionsCell = (
-              <button className="action-btn delete" onClick={function() { supprimerVisite(v.id); }}>Supprimer</button>
+              <button className="action-btn delete" onClick={function () { supprimerVisite(v.id); }}>Supprimer</button>
             );
           }
 
@@ -470,7 +470,7 @@ export default function Visites() {
           if (v.prisonnier !== null && v.prisonnier !== undefined) {
             nomPrisonnier = v.prisonnier.nom + ' ' + v.prisonnier.prenom;
           }
-          
+
           lignesTableau.push(
             <tr key={v.id}>
               <td>{nomPrisonnier}</td>
@@ -479,8 +479,8 @@ export default function Visites() {
               <td>{v.heure}</td>
               <td>{v.duree}</td>
               <td>
-                <button className="action-btn edit" onClick={function() { ouvrirModifier(v); }}>Modifier</button>
-                <button className="action-btn delete" onClick={function() { supprimerVisite(v.id); }}>Supprimer</button>
+                <button className="action-btn edit" onClick={function () { ouvrirModifier(v); }}>Modifier</button>
+                <button className="action-btn delete" onClick={function () { supprimerVisite(v.id); }}>Supprimer</button>
               </td>
             </tr>
           );
@@ -509,7 +509,7 @@ export default function Visites() {
     }
   } else if (vue === 'attente' && !isDirecteur) {
     const lignesTableau: any[] = [];
-    
+
     if (visitesEnAttente.length === 0) {
       lignesTableau.push(
         <tr key="vide"><td colSpan={6} style={{ textAlign: 'center', color: '#888780' }}>Aucune demande en attente</td></tr>
@@ -521,7 +521,7 @@ export default function Visites() {
         if (v.prisonnier !== null && v.prisonnier !== undefined) {
           nomPrisonnier = v.prisonnier.nom + ' ' + v.prisonnier.prenom;
         }
-        
+
         let visiteur = '';
         if (v.nomVisiteur) {
           visiteur = v.nomVisiteur;
@@ -565,7 +565,7 @@ export default function Visites() {
     );
   } else if (vue === 'creer' || vue === 'modifier') {
     const optionsPrisonniers: any[] = [];
-    
+
     const pArray = Array.isArray(prisonniers) ? prisonniers : [];
     for (let i = 0; i < pArray.length; i++) {
       const p = pArray[i];

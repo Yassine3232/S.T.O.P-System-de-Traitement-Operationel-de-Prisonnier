@@ -13,11 +13,13 @@ import { HistoriqueService } from '../historique/historique.service';
 @Injectable()
 export class VisitesService {
   constructor(
+    // InjectRepository() permet d'injecter un dépôt de données dans le service
+    // Repository<Visite> permet de spécifier le type de données que l'on veut injecter (Repository<T> est un paramètre générique de type T)
     @InjectRepository(Visite) private repoVisite: Repository<Visite>,
     @InjectRepository(Prisonnier) private repoPrisonnier: Repository<Prisonnier>,
     @InjectRepository(Incident) private repoIncident: Repository<Incident>,
     private historiqueService: HistoriqueService,
-  ) {}
+  ) { }
 
   async soumettreDemandeVisite(donnees: CreerDemandeVisiteDto) {
     const prisonnier = await this.repoPrisonnier.findOne({ where: { numeroIdentification: donnees.prisonnierId } });
@@ -34,32 +36,19 @@ export class VisitesService {
   }
 
   async consulterDossierPrisonnier(prisonnierId: number) {
-    const prisonnier = await this.repoPrisonnier.findOne({ where: { numeroIdentification: prisonnierId } });
-    if (prisonnier === null) throw new NotFoundException('Prisonnier introuvable');
+    const prisonnier = await this.repoPrisonnier.findOne({ where: { numeroIdentification: prisonnierId } }); // .findOne() pour trouver un enregistrement spécifique
+    if (!prisonnier) throw new NotFoundException('Prisonnier introuvable');
 
-    const tousLesIncidents = await this.repoIncident.find({ relations: ['prisonniers'] });
-    const incidentsLies: Incident[] = [];
+    const tousLesIncidents = await this.repoIncident.find({ relations: ['prisonniers'] }); // .find() pour trouver tous les enregistrements dans la table incidents
+    const incidentsLies = tousLesIncidents.filter(inc => // .filter() pour filtrer les enregistrements selon une condition
+      inc.prisonniers.some(p => p.numeroIdentification === prisonnierId) // .some() pour vérifier si le prisonnier est lié à l'incident (return false or true)
+    );
 
-    for (let i = 0; i < tousLesIncidents.length; i++) {
-      const incident = tousLesIncidents[i];
-      let aCePrisonnier = false;
-      for (let j = 0; j < incident.prisonniers.length; j++) {
-        if (incident.prisonniers[j].numeroIdentification === prisonnierId) {
-          aCePrisonnier = true;
-        }
-      }
-      if (aCePrisonnier === true) incidentsLies.push(incident);
-    }
-
-    const visitesPrecedentes = await this.repoVisite.find({
+    const visitesPrecedentes = await this.repoVisite.find({ // .find() pour trouver tous les enregistrements dans la table visites
       where: { prisonnier: { numeroIdentification: prisonnierId } as any },
     });
 
-    return {
-      prisonnier: prisonnier,
-      incidents: incidentsLies,
-      visitesPrecedentes: visitesPrecedentes,
-    };
+    return { prisonnier, incidentsLies, visitesPrecedentes };
   }
 
   async repondreDemandeVisite(visiteId: number, donnees: RepondreDemandeVisiteDto) {
@@ -70,7 +59,7 @@ export class VisitesService {
     if (donnees.decision === 'approuvee') {
       visite.statut = 'approuvee';
       visite.dateVisite = donnees.dateVisite;
-      await this.historiqueService.enregistrer(
+      await this.historiqueService.enregistrer( // .enregistrer() pour enregistrer un événement dans la table historique , await parce que c'est une opération asynchrone
         visite.prisonnier,
         'visite',
         `Visite approuvée — ${visite.nomMembreFamille} le ${donnees.dateVisite}`,
@@ -92,6 +81,8 @@ export class VisitesService {
 
   async listerDemandesEnAttente() {
     return this.repoVisite.find({ where: { statut: 'en_attente' }, relations: ['prisonnier'] });
+    // .relations: ['prisonnier'] permet de récupérer les données de la table prisonniers en même temps que les données de la table visites pour
+    //  éviter les requêtes multiples et améliorer les performances
   }
 
   async findAll() {
@@ -105,10 +96,11 @@ export class VisitesService {
   }
 
   async creer(donnees: CreerVisiteDto) {
+    // async parce que c'est une opération asynchrone pour l'interogation de la base de données car l'interogation de la base de données peut prendre du temps (attente de reponse) et pour que le programme ne se bloque pas il faut utiliser async/await
     const prisonnier = await this.repoPrisonnier.findOne({ where: { numeroIdentification: donnees.prisonnierId } });
     if (prisonnier === null) throw new NotFoundException('Prisonnier introuvable');
 
-    const nouvelleVisite = this.repoVisite.create({
+    const nouvelleVisite = this.repoVisite.create({ // .create() pour créer un nouvel enregistrement dans la table visites
       prisonnier: prisonnier,
       nomVisiteur: donnees.nomVisiteur,
       date: donnees.date,
@@ -129,7 +121,7 @@ export class VisitesService {
       if (prisonnier === null) throw new NotFoundException('Prisonnier introuvable');
       visite.prisonnier = prisonnier;
     }
-
+    // !== undefined pour dire que le champ a été fourni (il n'est pas vide), si c'est le cas on modifie la valeur de la visite
     if (donnees.nomVisiteur !== undefined) visite.nomVisiteur = donnees.nomVisiteur;
     if (donnees.date !== undefined) visite.date = donnees.date;
     if (donnees.heure !== undefined) visite.heure = donnees.heure;
@@ -141,6 +133,6 @@ export class VisitesService {
   async supprimer(id: number) {
     const visite = await this.repoVisite.findOne({ where: { id: id } });
     if (visite === null) throw new NotFoundException('Visite introuvable');
-    await this.repoVisite.remove(visite);
+    await this.repoVisite.remove(visite); // .remove() pour supprimer un enregistrement de la table visites
   }
 }

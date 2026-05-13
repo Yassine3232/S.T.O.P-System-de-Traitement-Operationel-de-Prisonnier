@@ -18,7 +18,7 @@ export class Incident {
   @Column()
   rapportePar: string;
 
-  @ManyToMany(() => Prisonnier)
+  @ManyToMany(() => Prisonnier, { onDelete: 'CASCADE' }) //cascade permet de supprimer tous les incidents liés à un prisonnier si ce dernier est supprimé
   @JoinTable()
   prisonniers: Prisonnier[];
 }

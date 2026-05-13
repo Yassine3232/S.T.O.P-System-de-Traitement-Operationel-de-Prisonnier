@@ -41,10 +41,14 @@ export class PrisonniersController {
   @Roles(Profile.Garde,Profile.Directeur)
   @Patch('/:id')
   async updatePrisonnier(@Param('id', ParseIntPipe) id: number, @Body() body: any) {
-    try {
-      return await this.service.update(id, body);
-    } catch (err) {
-      throw new NotFoundException(`Ce prisonnier avec l'id ${id} est introuvable. Impossible de le modifier.`);
-    }
+      return await this.service.update(id, body);  
+  }
+
+  @AllowedConnected()
+  @UseGuards(RolesGuard)
+  @Roles(Profile.Directeur)
+  @Post('/liberer-expires')
+  async libererExpires() {
+    return await this.service.libererExpires();
   }
 }

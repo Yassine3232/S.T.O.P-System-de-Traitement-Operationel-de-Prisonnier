@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { demandeVisite } from '../api/visites.service';
 import './Signup.css';
 
 export default function DemandeVisite() {
@@ -44,7 +44,7 @@ export default function DemandeVisite() {
     }
 
     try {
-      await axios.post('http://localhost:3000/visites/demande', {
+      await demandeVisite({
         prisonnierId: Number(form.prisonnierId),
         nomMembreFamille: form.nomMembreFamille,
         lienFamilial: form.lienFamilial,

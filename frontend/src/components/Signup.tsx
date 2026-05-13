@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import { signup } from '../api/auth.service';
 import './Signup.css';
 
 interface SignupForm {
@@ -10,8 +10,8 @@ interface SignupForm {
   dateNaissance: string;
 }
 
-export default function Signup() {
-  const [form, setForm] = useState<SignupForm>({
+export default function Signup() { //fonction Signup permet d'afficher le formulaire d'inscription 
+  const [form, setForm] = useState<SignupForm>({ //form est un objet qui contient les informations du formulaire
     name: '',
     email: '',
     password: '',
@@ -19,16 +19,16 @@ export default function Signup() {
     dateNaissance: '',
   });
   
-  const [reponse, setReponse] = useState('');
-  const [erreur, setErreur] = useState('');
+  const [reponse, setReponse] = useState(''); //reponse est une chaine de caractere qui contient le message de reponse
+  const [erreur, setErreur] = useState(''); //erreur est une chaine de caractere qui contient le message d'erreur
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
-    const newForm = { ...form };
-    const name = e.target.name;
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) { //fonction handleChange permet de mettre a jour les champs du formulaire
+    const newForm = { ...form }; //newForm est une copie de form
+    const name = e.target.name; //name est le nom du champ
     const value = e.target.value;
     
-    if (name === 'name') {
-      newForm.name = value;
+    if (name === 'name') { //si le nom est name
+      newForm.name = value; //newForm.name est mis a jour avec la valeur du champ name
     } else if (name === 'email') {
       newForm.email = value;
     } else if (name === 'password') {
@@ -39,12 +39,12 @@ export default function Signup() {
       newForm.dateNaissance = value;
     }
     
-    setForm(newForm);
+    setForm(newForm); //newForm est mis a jour avec les nouvelles valeurs
   }
 
-  async function envoyerSignup() {
+  async function envoyerSignup() { //fonction envoyerSignup permet d'envoyer le formulaire
     if (form.name === '') {
-      setErreur('Veuillez remplir tous les champs obligatoires');
+      setErreur('Veuillez remplir tous les champs obligatoires'); //si le formulaire est vide
       return;
     }
     if (form.email === '') {
@@ -59,10 +59,10 @@ export default function Signup() {
     try {
       let profileNumber = 0;
       if (form.profile !== '') {
-        profileNumber = Number(form.profile);
+        profileNumber = Number(form.profile); //profileNumber est un nombre qui permet de stocker le profil de l'utilisateur
       }
 
-      const res = await axios.post('http://localhost:3000/auth/signup', {
+      const data = await signup({
         name: form.name,
         email: form.email,
         password: form.password,
@@ -70,8 +70,8 @@ export default function Signup() {
         dateNaissance: form.dateNaissance,
       });
       
-      if (res.data && res.data.message) {
-        setReponse(res.data.message);
+      if (data && data.message) {
+        setReponse(data.message);
       } else {
         setReponse('Inscription réussie');
       }
@@ -92,11 +92,11 @@ export default function Signup() {
   }
 
   const barresArray = [];
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 8; i++) { //boucle qui permet de créer 8 barres
     barresArray.push(i);
   }
 
-  let dateTexte = new Date().toLocaleDateString('fr-CA');
+  let dateTexte = new Date().toLocaleDateString('fr-CA'); //dateTexte est une chaine de caractere qui contient la date actuelle 
 
   return (
     <div className="prison-wrap">

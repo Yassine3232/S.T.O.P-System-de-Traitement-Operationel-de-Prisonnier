@@ -31,6 +31,6 @@ export class Prisonnier {
   photoProfil: string;
 
   @ManyToOne(() => Cellule, (cellule) => cellule.prisonniers)
-  @JoinColumn({ name: 'cellule_name' }) // Optional: customizes foreign key column name
+  @JoinColumn({ name: 'cellule_name' })
   cellule!: Cellule;
 }

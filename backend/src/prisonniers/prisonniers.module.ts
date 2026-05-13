@@ -8,11 +8,13 @@ import { RolesGuard } from '../guards/roles-guards';
 import { UserModule } from '../users/users.module';
 import { PrisonniersSeeder } from './prisonnier.seeder';
 import { HistoriqueModule } from '../historique/historique.module';
+import { PrisonniersScheduler } from './prisonniers.scheduler';
+
 
 @Module({
   imports: [TypeOrmModule.forFeature([Prisonnier, Cellule]), UserModule, HistoriqueModule],
-  providers: [PrisonniersService, RolesGuard, PrisonniersSeeder],
+  providers: [PrisonniersService, RolesGuard, PrisonniersSeeder, PrisonniersScheduler],
   controllers: [PrisonniersController],
-  exports: [TypeOrmModule, PrisonniersSeeder],
+  exports: [TypeOrmModule, PrisonniersSeeder, PrisonniersService],
 })
-export class PrisonniersModule {}
+export class PrisonniersModule { }

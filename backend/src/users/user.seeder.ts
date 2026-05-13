@@ -4,40 +4,32 @@ import { Profile } from './enum/profile.enum';
 
 @Injectable()
 export class UsersSeeder {
-  constructor(
-    private authService: AuthService,
-  ) {}
+  constructor(private authService: AuthService) {}
 
   async seed() {
     const usersParDefaut = [
       {
         email: 'adamroy7428@gmail.com',
-        password: '123',
+        password: process.env.SEED_PASSWORD ?? '123', // Remplir le fichier .env pour que ça marche, sinon c'est 123 par défaut
         name: 'Adam',
         profile: Profile.Garde,
         dateNaissance: '2005-07-15',
       },
       {
         email: 'royst@videotron.ca',
-        password: '123',
+        password: process.env.SEED_PASSWORD ?? '123', // Remplir le fichier .env pour que ça marche, sinon c'est 123 par défaut
         name: 'Stéphane',
         profile: Profile.Directeur,
         dateNaissance: '1966-07-24',
       },
     ];
 
-    for (const donnees of usersParDefaut) {
+    for (const { email, password, name, profile, dateNaissance } of usersParDefaut) {
       try {
-        await this.authService.signup(
-          donnees.email,
-          donnees.password,
-          donnees.name,
-          donnees.profile,
-          donnees.dateNaissance,
-        );
-        console.log(`Utilisateur "${donnees.name}" créé`);
-      } catch (e) {
-        console.log(`User "${donnees.name}" est déjà présent dans la base de données`);
+        await this.authService.signup(email, password, name, profile, dateNaissance);
+        console.log(`Utilisateur "${name}" créé`);
+      } catch {
+        console.log(`Utilisateur "${name}" est déjà présent dans la base de données`);
       }
     }
   }

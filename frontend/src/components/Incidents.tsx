@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { getIncidents, createIncident, deleteIncident } from '../api/incidents.service';
 import './Incidents.css';
 
 interface Incident {
@@ -54,8 +54,8 @@ export default function Incidents() {
 
   async function chargerIncidents() {
     try {
-      const res = await axios.get('http://localhost:3000/incidents');
-      setIncidents(res.data);
+      const data = await getIncidents();
+      setIncidents(data);
     } catch (e: any) {
       setErreur('Erreur lors du chargement des incidents');
     }
@@ -111,7 +111,7 @@ export default function Incidents() {
         numericIds.push(Number(strId));
       }
 
-      await axios.post('http://localhost:3000/incidents', {
+      await createIncident({
         type: form.type,
         description: form.description,
         dateHeure: form.dateHeure,
@@ -140,7 +140,7 @@ export default function Incidents() {
     }
     
     try {
-      await axios.delete('http://localhost:3000/incidents/' + id);
+      await deleteIncident(id);
       chargerIncidents();
     } catch (e: any) {
       setErreur('Erreur lors de la suppression');

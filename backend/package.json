@@ -23,6 +23,7 @@
     "@nestjs/common": "^11.1.14",
     "@nestjs/core": "^11.1.14",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/schedule": "^6.1.3",
     "@nestjs/typeorm": "^11.0.0",
     "@types/cookie-session": "^2.0.49",
     "class-transformer": "^0.5.1",

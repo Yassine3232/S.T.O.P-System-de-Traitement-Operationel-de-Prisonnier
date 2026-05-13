@@ -1,14 +1,14 @@
 import { applyDecorators, UseGuards } from '@nestjs/common';
 import { AdminGuard, ConnectedGuard } from './admin-guards';
 
-export function AllowedLoggedIn() {
+export function AllowedLoggedIn() { //décorateur qui permet de vérifier si l'utilisateur est connecté 
   return applyDecorators(
-    UseGuards(AdminGuard)
+    UseGuards(AdminGuard) //applique le garde admin
   );
 }
 
-export function AllowedConnected() {
+export function AllowedConnected() { //décorateur qui permet de vérifier si l'utilisateur est connecté
   return applyDecorators(
-    UseGuards(ConnectedGuard)
+    UseGuards(ConnectedGuard) //applique le garde connecté
   );
 }

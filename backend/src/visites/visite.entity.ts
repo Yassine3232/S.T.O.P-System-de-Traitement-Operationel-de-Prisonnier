@@ -3,7 +3,7 @@ import { Prisonnier } from '../prisonniers/prisonnier.entity';
 
 @Entity()
 export class Visite {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn() // @PrimaryGeneratedColumn() est un décorateur qui permet de spécifier que le champ id est une clé primaire auto-incrémentée
   id: number;
 
   @Column({ nullable: true })
@@ -33,7 +33,9 @@ export class Visite {
   @Column({ nullable: true })
   motifRefus: string;
 
-  @ManyToOne(() => Prisonnier)
+  @ManyToOne(() => Prisonnier, { onDelete: 'CASCADE' })
+  //ManytoOne lie la table visites à la table prisonniers
+  //cascade permet de spécifier que le champ prisonnier est une clé étrangère de la table visites et qu'elle est liée à la table prisonniers
   @JoinColumn()
   prisonnier: Prisonnier;
 }

@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './users/users.module';
 import { PrisonniersModule } from './prisonniers/prisonniers.module';
-import { CellulesModule } from './cellules/celluless.module';
+import { CellulesModule } from './cellules/cellules.module';
 import { IncidentsModule } from './incidents/incidents.module';
 import { VisitesModule } from './visites/visites.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -11,6 +11,8 @@ import { CellulesSeeder } from './cellules/cellules.seeder';
 import { UsersSeeder } from './users/user.seeder';
 import { PrisonniersSeeder } from './prisonniers/prisonnier.seeder';
 import { HistoriqueModule } from './historique/historique.module';
+import { ScheduleModule } from '@nestjs/schedule';
+
 
 
 @Module({
@@ -21,6 +23,7 @@ import { HistoriqueModule } from './historique/historique.module';
       autoLoadEntities: true,
       synchronize: true,
     }),
+    ScheduleModule.forRoot(),
     UserModule,
     PrisonniersModule,
     CellulesModule,
@@ -29,7 +32,7 @@ import { HistoriqueModule } from './historique/historique.module';
     HistoriqueModule,
   ],
   controllers: [AppController],
-  providers: [AppService, CellulesSeeder],
+  providers: [AppService, CellulesSeeder, UsersSeeder, PrisonniersSeeder],
 })
 export class AppModule implements OnModuleInit {
   constructor(

@@ -3,7 +3,7 @@ import { PrisonniersService } from './prisonniers.service';
 
 @Injectable()
 export class PrisonniersSeeder {
-  constructor(private prisonniersService: PrisonniersService) {}
+  constructor(private prisonniersService: PrisonniersService) { }
 
   async seed() {
     const prisonniers = [
@@ -76,40 +76,43 @@ export class PrisonniersSeeder {
     ];
 
     try {
-      const res = await fetch('https://randomuser.me/api/?results=10');
-      const data = await res.json();
+      const res = await fetch('https://randomuser.me/api/?results=10'); //fetch() est une fonction qui permet de faire une requete HTTP a une api externe  
+      const data = await res.json(); //res.json() est une fonction qui permet de convertir la reponse en json
       const results = data.results;
-      
+
       const accusations = ['Vol à main armée', 'Fraude', 'Agression', 'Trafic de drogue', 'Meurtre', 'Cybercriminalité', 'Vandalisme', 'Recel'];
       const cellulesPossibles = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10'];
-      
+
       for (let k = 0; k < results.length; k++) {
         const r = results[k];
-        
-        const idxAcc = Math.floor(Math.random() * accusations.length);
-        const accusation = accusations[idxAcc];
-        
+
+        const idxAcc = Math.floor(Math.random() * accusations.length); //idxAcc est un nombre aleatoire entre 0 et 7 
+        const accusation = accusations[idxAcc]; //idxAcc est un nombre aleatoire entre 0 et 7 et accusation est le type d'accusation
+
         const idxCel = Math.floor(Math.random() * cellulesPossibles.length);
-        const celluleNom = cellulesPossibles[idxCel];
-        
-        const dureePeine = Math.floor(Math.random() * 20) + 1;
-        
+        const celluleNom = cellulesPossibles[idxCel]; //idxCel est un nombre aleatoire entre 0 et 9 
+
+        const dureePeine = Math.floor(Math.random() * 20) + 1; //dureePeine est un nombre aleatoire entre 1 et 20
+
         let dateNaissance = '';
-        if (r.dob && r.dob.date) {
-          dateNaissance = r.dob.date.split('T')[0];
+        if (r.dob && r.dob.date) { //r.dob && r.dob.date permet de verifier si la date de naissance existe
+          //.dob est un objet qui contient la date de naissance
+          //.date est la date de naissance
+          //.split('T') permet de separer la date de naissance en deux parties (la date et l'heure)
+          dateNaissance = r.dob.date.split('T')[0]; //[0] permet de prendre la date et [1] permet de prendre l'heure
         } else {
           dateNaissance = '1990-01-01';
         }
-        
+
         let dateArrivee = '';
         if (r.registered && r.registered.date) {
           dateArrivee = r.registered.date.split('T')[0];
         } else {
           dateArrivee = '2023-01-01';
         }
-        
-        let anneeArrivee = parseInt(dateArrivee.split('-')[0]);
-        const dateSortiePrevue = (anneeArrivee + dureePeine) + '-01-01';
+
+        let anneeArrivee = parseInt(dateArrivee.split('-')[0]); //parseInt permet de convertir une chaine de caractere en nombre entier 
+        const dateSortiePrevue = (anneeArrivee + dureePeine) + '-01-01'; //dateSortiePrevue est la date de sortie prevue
 
         prisonniers.push({
           nom: r.name.last,
@@ -127,78 +130,78 @@ export class PrisonniersSeeder {
       console.log("Erreur lors de l'appel a randomuser.me");
     }
 
-    for (let i = 0; i < prisonniers.length; i++) {
-      const donnees = prisonniers[i];
+    for (let i = 0; i < prisonniers.length; i++) { //boucle sur les prisonniers 
+      const donnees = prisonniers[i]; //donnees est un tableau de prisonniers 
       try {
-        const existants = await this.prisonniersService.findAll();
-        let dejaPresent = false;
-        
-        for (let j = 0; j < existants.length; j++) {
-          if (existants[j].nom === donnees.nom && existants[j].prenom === donnees.prenom) {
-            dejaPresent = true;
+        const existants = await this.prisonniersService.findAll(); //existants est un tableau de prisonniers deja existants 
+        let dejaPresent = false; //dejaPresent est un boolean qui permet de savoir si le prisonnier est deja existant
+
+        for (let j = 0; j < existants.length; j++) { //boucle sur les prisonniers deja existants 
+          if (existants[j].nom === donnees.nom && existants[j].prenom === donnees.prenom) { //si le nom et le prenom du prisonnier sont les memes que le prisonnier deja existant 
+            dejaPresent = true; //dejaPresent devient true 
           }
         }
-        
-        if (dejaPresent === false) {
-          let cree = false;
-          let tentatives = 0;
-          const cellulesPossibles = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10'];
-          
-          while (cree === false && tentatives <= cellulesPossibles.length) {
+
+        if (dejaPresent === false) { //si le prisonnier n'est pas deja existant 
+          let cree = false; //cree est un boolean qui permet de savoir si le prisonnier a ete cree
+          let tentatives = 0; //tentatives est un nombre de tentatives de creation
+          const cellulesPossibles = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10']; //cellulesPossibles est un tableau de cellules possibles
+
+          while (cree === false && tentatives <= cellulesPossibles.length) { //boucle sur les tentatives de creation
             try {
-              await this.prisonniersService.create(donnees);
-              console.log('Prisonnier "' + donnees.prenom + ' ' + donnees.nom + '" créé dans ' + donnees.celluleNom);
-              cree = true;
+              await this.prisonniersService.create(donnees); //creation du prisonnier
+              console.log('Prisonnier "' + donnees.prenom + ' ' + donnees.nom + '" créé dans ' + donnees.celluleNom); //affichage du prisonnier cree
+              cree = true; //cree devient true
             } catch (e: any) {
-              if (e.message && e.message.includes('pleine')) {
-                if (tentatives < cellulesPossibles.length) {
-                  donnees.celluleNom = cellulesPossibles[tentatives];
-                  tentatives++;
+              if (e.message && e.message.includes('pleine')) { //si le message d'erreur contient "pleine" 
+                if (tentatives < cellulesPossibles.length) { //si le nombre de tentatives est inferieur au nombre de cellules possibles 
+                  donnees.celluleNom = cellulesPossibles[tentatives]; //donnees.celluleNom prend la valeur de la cellule possible 
+                  tentatives++; //tentatives est incremente 
                 } else {
-                  console.log('Toutes les cellules sont pleines !');
-                  break;
+                  console.log('Toutes les cellules sont pleines !'); //affichage du message d'erreur 
+                  break; //break permet de sortir de la boucle 
                 }
               } else {
-                console.log('Erreur lors de la création du prisonnier "' + donnees.prenom + ' ' + donnees.nom + '"');
-                break;
+                console.log('Erreur lors de la création du prisonnier "' + donnees.prenom + ' ' + donnees.nom + '"'); //affichage du message d'erreur 
+                break; //break permet de sortir de la boucle 
               }
+            } //fin du while
+          }
+        } else { //si le prisonnier est deja existant 
+          let prisonnierId = 0; //prisonnierId est un nombre qui permet de stocker l'id du prisonnier 
+          for (let j = 0; j < existants.length; j++) { //boucle sur les prisonniers deja existants 
+            if (existants[j].nom === donnees.nom && existants[j].prenom === donnees.prenom) { //si le nom et le prenom du prisonnier sont les memes que le prisonnier deja existant 
+              prisonnierId = existants[j].numeroIdentification; //prisonnierId prend la valeur de l'id du prisonnier 
             }
           }
-        } else {
-          let prisonnierId = 0;
-          for (let j = 0; j < existants.length; j++) {
-            if (existants[j].nom === donnees.nom && existants[j].prenom === donnees.prenom) {
-              prisonnierId = existants[j].numeroIdentification;
-            }
-          }
-          
-          let misAJour = false;
-          let tentatives = 0;
-          const cellulesPossibles = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10'];
-          
-          while (misAJour === false && tentatives <= cellulesPossibles.length) {
+
+          let misAJour = false; //misAJour est un boolean qui permet de savoir si le prisonnier a ete mis a jour 
+          let tentatives = 0; //tentatives est un nombre de tentatives de mise a jour 
+          const cellulesPossibles = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10']; //cellulesPossibles est un tableau de cellules possibles
+
+          while (misAJour === false && tentatives <= cellulesPossibles.length) { //boucle sur les tentatives de mise a jour
             try {
-              await this.prisonniersService.update(prisonnierId, { celluleNom: donnees.celluleNom } as any);
-              console.log('Prisonnier "' + donnees.prenom + ' ' + donnees.nom + '" existe déjà, cellule mise à jour (' + donnees.celluleNom + ')');
-              misAJour = true;
-            } catch (e: any) {
-              if (e.message && e.message.includes('pleine')) {
-                if (tentatives < cellulesPossibles.length) {
-                  donnees.celluleNom = cellulesPossibles[tentatives];
-                  tentatives++;
+              await this.prisonniersService.update(prisonnierId, { celluleNom: donnees.celluleNom } as any); //mise a jour du prisonnier
+              console.log('Prisonnier "' + donnees.prenom + ' ' + donnees.nom + '" existe déjà, cellule mise à jour (' + donnees.celluleNom + ')'); //affichage du prisonnier mis a jour 
+              misAJour = true; //misAJour devient true
+            } catch (e: any) { //catch est utilise pour capturer les erreurs 
+              if (e.message && e.message.includes('pleine')) { //si le message d'erreur contient "pleine" 
+                if (tentatives < cellulesPossibles.length) { //si le nombre de tentatives est inferieur au nombre de cellules possibles 
+                  donnees.celluleNom = cellulesPossibles[tentatives]; //donnees.celluleNom prend la valeur de la cellule possible 
+                  tentatives++; //tentatives est incremente 
                 } else {
-                  console.log('Toutes les cellules sont pleines !');
-                  break;
+                  console.log('Toutes les cellules sont pleines !'); //affichage du message d'erreur 
+                  break; //break permet de sortir de la boucle 
                 }
               } else {
-                console.log('Erreur lors de la mise à jour du prisonnier "' + donnees.prenom + ' ' + donnees.nom + '"');
-                break;
+                console.log('Erreur lors de la mise à jour du prisonnier "' + donnees.prenom + ' ' + donnees.nom + '"'); //affichage du message d'erreur 
+                break; //break permet de sortir de la boucle 
               }
-            }
+            } //fin du while
           }
-        }
-      } catch (e) {
-        console.log('Erreur fatale lors du traitement de ' + donnees.prenom + ' ' + donnees.nom);
+        } //fin du else
+      } catch (e) { //catch est utilise pour capturer les erreurs 
+        console.log('Erreur fatale lors du traitement de ' + donnees.prenom + ' ' + donnees.nom); //affichage du message d'erreur 
       }
     }
   }

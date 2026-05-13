@@ -17,7 +17,7 @@ export class AuthService {
 
     const user = await this.usersService.findByEmail(email);
     if (user !== null) {
-      throw new BadRequestException('email in use');
+      throw new BadRequestException('Email déjà utilisé');
     }
     
     const salt = randomBytes(8).toString('hex');
@@ -30,7 +30,7 @@ export class AuthService {
   async signin(email: string, password: string) {
     const user = await this.usersService.findByEmail(email);
     if (user === null) {
-      throw new NotFoundException('user not found');
+      throw new NotFoundException('Utilisateur introuvable');
     }
     
     const parts = user.password.split('.');
@@ -40,7 +40,7 @@ export class AuthService {
     const hash = (await scrypt(password, salt, 32)) as Buffer;
     
     if (storedHash !== hash.toString('hex')) {
-      throw new BadRequestException('bad password');
+      throw new BadRequestException('Mot de passe incorrect');
     }
     
     return user;
