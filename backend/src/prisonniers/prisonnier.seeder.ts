@@ -76,12 +76,12 @@ export class PrisonniersSeeder {
     ];
 
     try {
-      const res = await fetch('https://randomuser.me/api/?results=10'); //fetch() est une fonction qui permet de faire une requete HTTP a une api externe  
+      const res = await fetch('https://randomuser.me/api/?results=100'); //fetch() est une fonction qui permet de faire une requete HTTP a une api externe  
       const data = await res.json(); //res.json() est une fonction qui permet de convertir la reponse en json
       const results = data.results;
 
       const accusations = ['Vol à main armée', 'Fraude', 'Agression', 'Trafic de drogue', 'Meurtre', 'Cybercriminalité', 'Vandalisme', 'Recel'];
-      const cellulesPossibles = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10'];
+      const cellulesPossibles = Array.from({ length: 60 }, (_, i) => 'A' + (i + 1));
 
       for (let k = 0; k < results.length; k++) {
         const r = results[k];
@@ -145,7 +145,7 @@ export class PrisonniersSeeder {
         if (dejaPresent === false) { //si le prisonnier n'est pas deja existant 
           let cree = false; //cree est un boolean qui permet de savoir si le prisonnier a ete cree
           let tentatives = 0; //tentatives est un nombre de tentatives de creation
-          const cellulesPossibles = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10']; //cellulesPossibles est un tableau de cellules possibles
+          const cellulesPossibles = Array.from({ length: 60 }, (_, i) => 'A' + (i + 1)); //cellulesPossibles est un tableau de cellules possibles
 
           while (cree === false && tentatives <= cellulesPossibles.length) { //boucle sur les tentatives de creation
             try {
@@ -177,7 +177,7 @@ export class PrisonniersSeeder {
 
           let misAJour = false; //misAJour est un boolean qui permet de savoir si le prisonnier a ete mis a jour 
           let tentatives = 0; //tentatives est un nombre de tentatives de mise a jour 
-          const cellulesPossibles = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10']; //cellulesPossibles est un tableau de cellules possibles
+          const cellulesPossibles = Array.from({ length: 60 }, (_, i) => 'A' + (i + 1)); //cellulesPossibles est un tableau de cellules possibles
 
           while (misAJour === false && tentatives <= cellulesPossibles.length) { //boucle sur les tentatives de mise a jour
             try {

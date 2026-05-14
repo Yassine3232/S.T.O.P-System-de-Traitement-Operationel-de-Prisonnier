@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { getCellules } from '../api/cellules.service';
-import './Incidents.css'; 
+import './Incidents.css';
 
 interface Prisonnier {
   numeroIdentification: number;
@@ -106,7 +106,7 @@ export default function Cellules() { //fonction Cellules permet de afficher les 
               {cellules.length === 0 && (
                 <tr><td colSpan={4} style={{ textAlign: 'center', color: '#888780' }}>Aucune cellule trouvée</td></tr>
               )}
-              {cellules.map(function(c) {
+              {cellules.map(function (c) {
                 let listeNoms = '';
                 if (c.prisonniers && c.prisonniers.length > 0) {
                   for (let i = 0; i < c.prisonniers.length; i++) {

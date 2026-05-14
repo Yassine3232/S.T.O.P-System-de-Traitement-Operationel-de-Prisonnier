@@ -30,3 +30,13 @@ export async function createIncident(data: CreateIncidentData): Promise<any> {
 export async function deleteIncident(id: number): Promise<void> {
   await apiClient.delete(`/incidents/${id}`);
 }
+
+export async function getIncident(id: number): Promise<Incident> {
+  const res = await apiClient.get(`/incidents/${id}`);
+  return res.data;
+}
+
+export async function updateIncident(id: number, data: Partial<CreateIncidentData>): Promise<any> {
+  const res = await apiClient.patch(`/incidents/${id}`, data);
+  return res.data;
+}

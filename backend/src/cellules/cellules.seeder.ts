@@ -11,7 +11,7 @@ export class CellulesSeeder {
   ) { }
 
   async seed() {
-    for (let i = 1; i <= 10; i++) { //boucle for qui permet de créer 10 cellules 
+    for (let i = 1; i <= 60; i++) { //boucle for qui permet de créer 60 cellules 
       const nom = `A${i}`;//nom est une variable qui permet de stocker le nom de la cellule 
 
       // Vérifie si la cellule existe déjà pour éviter les doublons

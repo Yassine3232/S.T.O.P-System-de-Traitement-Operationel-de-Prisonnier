@@ -25,10 +25,11 @@ export function AuthProvider({ children }: { children: ReactNode }) { //AuthProv
   function logout() { //logout est une fonction qui permet de déconnecter un utilisateur 
     setUser(null); //setUser est une fonction qui permet de mettre à jour l'utilisateur connecté 
   }
-
+  //children est un paramètre qui permet de spécifier les composants enfants 
+  //AuthContext.Provider est un composant qui permet de fournir les données de l'utilisateur connecté à tous les composants enfants 
   return (
-    <AuthContext.Provider value={{ user: user, login: login, logout: logout }}> //AuthContext.Provider est un composant qui permet de fournir les données de l'utilisateur connecté à tous les composants enfants 
-      {children} //children est un paramètre qui permet de spécifier les composants enfants 
+    <AuthContext.Provider value={{ user: user, login: login, logout: logout }}>
+      {children}
     </AuthContext.Provider>
   );
 }

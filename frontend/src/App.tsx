@@ -10,6 +10,7 @@ import Cellules from './components/Cellules';
 import Visites from './components/Visites';
 import Comptes from './components/Comptes';
 import DemandeVisite from './components/DemandeVisite';
+import ModifierIncident from './components/ModifierIncident';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="/visites" element={<Visites />} />
           <Route path="/comptes" element={<Comptes />} />
           <Route path="/visite" element={<DemandeVisite />} />
+          <Route path="/incidents/:id/modifier" element={<ModifierIncident />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
